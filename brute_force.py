@@ -2,7 +2,7 @@ from networkit import Glist
 from itertools import combinations
 
 
-def do_brute_force(g, cand_edges, k):
+def do_brute_force(g, k, cand_edges):
     glist = Glist(g)
     best_gain = 0
     best_edges = None

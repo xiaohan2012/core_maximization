@@ -26,3 +26,15 @@ def test_k3(g, cand_edges):
     assert e3[1] == 5
     assert e3[0] in set(range(5))
     assert e3[0] != e2[0]
+
+
+def test_states(g, cand_edges):
+    """states are the same before/after calling do_greedy
+    """
+    cand_edges_prev = set(list(cand_edges))
+    edges_prev = set(g.edges())
+
+    do_greedy(g, 3, cand_edges)
+
+    assert set(g.edges()) == edges_prev
+    assert cand_edges_prev == cand_edges
