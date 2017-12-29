@@ -5,6 +5,21 @@ from itertools import combinations
 
 @pytest.fixture
 def g():
+    """
+       0
+      / \
+     /   \
+    /     \
+    1 --- 2
+    |    /|
+    |   / |
+    | /   |
+    |/    |
+    3 --- 4 --- 5
+
+    node       : 0  1  2  3  4  5
+    core number: 2  2  2  2  2  1
+    """        
     G = Graph()
     for i in range(6):
         G.addNode()
