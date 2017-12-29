@@ -1,6 +1,6 @@
 import pytest
 from networkit import Graph
-from itertools import combinations
+from util import complementary_edges
 
 
 @pytest.fixture
@@ -32,11 +32,6 @@ def g():
     return G
 
 
-def sort_pair(e):
-    return tuple(sorted(e))
-
-
 @pytest.fixture
 def cand_edges(g):
-    all_edges = set(map(sort_pair, combinations(g.nodes(), 2)))
-    return all_edges - set(map(sort_pair, g.edges()))
+    return complementary_edges(g)
