@@ -34,10 +34,11 @@ def edge_induced_subgraph(g, edges):
     return new_g
     
 
-def maximal_matching(g):
+def maximal_matching(g, return_unmatched=True):
     """given graph `g`, perform greedy matching algorithm, which gives factor-2 approximation"""
     edges = []
     to_match = set(g.vertices())
+    unmatched = []
     while len(to_match) > 0:
         v = next(iter(to_match))
         try:
@@ -49,8 +50,12 @@ def maximal_matching(g):
             to_match.remove(t)
         except StopIteration:
             to_match.remove(v)
+            unmatched.append(v)
 
-    return edges
+    if return_unmatched:
+        return edges, unmatched
+    else:
+        return edges
 
 
 def graph_equal(g1, g2):

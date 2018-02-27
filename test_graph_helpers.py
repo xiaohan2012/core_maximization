@@ -28,11 +28,12 @@ def test_edge_induced_subgraph(g, edges, nodes):
     assert graph_equal(old_g, g)  # g is not changed
 
 
-@pytest.mark.parametrize("graph_edges, expected_edges",
-                         [([(0, 1)], [(0, 1)]),
-                          ([(0, 1), (2, 3)], [(0, 1), (2, 3)]),
-                          ([(0, 1), (1, 2), (2, 3)], [(0, 1), (2, 3)])])
-def test_maximal_matching_simple(g, graph_edges, expected_edges):
+@pytest.mark.parametrize("graph_edges, expected_edges, expected_unmatched",
+                         [([(0, 1)], [(0, 1)], [2, 3]),
+                          ([(0, 1), (2, 3)], [(0, 1), (2, 3)], []),
+                          ([(0, 1), (1, 2), (2, 3)], [(0, 1), (2, 3)], [])])
+def test_maximal_matching_simple(g, graph_edges, expected_edges, expected_unmatched):
     g.add_edge_list(graph_edges)
-    actual_edges = maximal_matching(g)
+    actual_edges, unmatched = maximal_matching(g, return_unmatched=True)
     assert actual_edges == expected_edges
+    assert expected_unmatched == unmatched
