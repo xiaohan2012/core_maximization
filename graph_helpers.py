@@ -1,4 +1,4 @@
-from graph_tool import Graph
+from graph_tool import Graph, GraphView
 
 
 def gt_int_nodes(g):
@@ -32,7 +32,14 @@ def edge_induced_subgraph(g, edges):
     new_g.set_vertex_filter(vfilt)
     new_g.add_edge_list(edges)
     return new_g
-    
+
+
+def node_induced_subgraph(g, nodes):
+    vfilt = g.new_vertex_property('bool')
+    for v in nodes:
+        vfilt[v] = True
+    return GraphView(g, vfilt=vfilt)
+
 
 def maximal_matching(g, return_unmatched=True):
     """given graph `g`, perform greedy matching algorithm, which gives factor-2 approximation"""

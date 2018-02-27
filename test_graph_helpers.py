@@ -1,7 +1,7 @@
 import pytest
 from graph_tool import Graph
 
-from graph_helpers import (edge_induced_subgraph,
+from graph_helpers import (edge_induced_subgraph, node_induced_subgraph, 
                            gt_int_nodes, gt_int_edges,
                            graph_equal, maximal_matching)
 
@@ -27,6 +27,18 @@ def test_edge_induced_subgraph(g, edges, nodes):
 
     assert graph_equal(old_g, g)  # g is not changed
 
+
+@pytest.mark.parametrize("nodes", [[0, 1],
+                                   [2, 3]])
+def test_node_induced_subgraph(g, nodes):
+    old_g = Graph(g)  # copy it
+    
+    new_g = node_induced_subgraph(g, nodes)
+    assert gt_int_nodes(new_g) == nodes
+    assert not new_g.is_directed()
+
+    assert graph_equal(old_g, g)  # g is not changed
+    
 
 @pytest.mark.parametrize("graph_edges, expected_edges, expected_unmatched",
                          [([(0, 1)], [(0, 1)], [2, 3]),
