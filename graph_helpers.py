@@ -34,10 +34,21 @@ def edge_induced_subgraph(g, edges):
     return new_g
 
 
+def has_vertex(g, i):
+    # to avoid calling g.vertex, which is heavy
+    vfilt = g._Graph__filter_state['vertex_filter'][0]
+    if vfilt is None:  # no filter
+        return i < g.num_vertices() and i >= 0
+    else:
+        return vfilt.a[i] > 0
+
+
 def node_induced_subgraph(g, nodes):
     vfilt = g.new_vertex_property('bool')
+
     for v in nodes:
-        vfilt[v] = True
+        if has_vertex(g, v):
+            vfilt[v] = True
     return GraphView(g, vfilt=vfilt)
 
 
@@ -57,7 +68,7 @@ def maximal_matching(g, return_unmatched=True):
             to_match.remove(t)
         except StopIteration:
             to_match.remove(v)
-            unmatched.append(v)
+            unmatched.append(int(v))
 
     if return_unmatched:
         return edges, unmatched
