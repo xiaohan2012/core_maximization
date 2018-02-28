@@ -1,9 +1,11 @@
 import pytest
 from graph_tool import Graph
+from graph_tool.generation import complete_graph
 
 from graph_helpers import (edge_induced_subgraph, node_induced_subgraph,
                            gt_int_nodes, gt_int_edges,
-                           graph_equal, maximal_matching)
+                           graph_equal, maximal_matching,
+                           gt2nk)
 
 
 @pytest.fixture
@@ -55,3 +57,13 @@ def test_maximal_matching_simple(g, graph_edges, expected_edges, expected_unmatc
     actual_edges, unmatched = maximal_matching(g, return_unmatched=True)
     assert actual_edges == expected_edges
     assert expected_unmatched == unmatched
+
+
+def test_gt2nk():
+    gt_g = complete_graph(4)
+    nk_g = gt2nk(gt_g)
+    assert set(gt_int_nodes(gt_g)) == set(nk_g.nodes())
+    assert set(gt_int_edges(gt_g)) == set(map(lambda e: tuple(sorted(e)), nk_g.edges()))
+    assert gt_g.num_vertices() == nk_g.numberOfNodes()
+    assert gt_g.num_edges() == nk_g.numberOfEdges()
+    

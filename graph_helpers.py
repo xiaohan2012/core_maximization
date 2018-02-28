@@ -1,4 +1,33 @@
 from graph_tool import Graph, GraphView
+from networkit import Graph as NGraph
+
+from itertools import combinations
+
+
+def sort_pair(e):
+    return tuple(sorted(e))
+
+
+def normalize_edges(es):
+    return set(map(sort_pair, es))
+
+
+def complementary_edges(g):
+    if isinstance(g, Graph) or isinstance(g, GraphView):
+        nodes = list(map(int, g.vertices()))
+    else:
+        nodes = g.nodes()
+
+    all_edges = set(map(sort_pair, combinations(nodes, 2)))
+    return all_edges - set(map(sort_pair, g.edges()))
+
+
+def edge_set(g):
+    return set(map(sort_pair, g.edges()))
+
+
+def gt_edge2tuple(e):
+    return tuple(sorted([int(e.source()), int(e.target())]))
 
 
 def gt_int_nodes(g):
@@ -10,7 +39,7 @@ def gt_int_nodes(g):
 def gt_int_edges(g):
     """return list of edges as (int, int) in g
     """
-    return list(sorted(map(lambda e: tuple(sorted(e)), g.edges())))
+    return list(sorted(map(gt_edge2tuple, g.edges())))
 
 
 def edge_induced_subgraph(g, edges):
@@ -79,3 +108,12 @@ def maximal_matching(g, return_unmatched=True):
 def graph_equal(g1, g2):
     return (set(gt_int_nodes(g1)) == set(gt_int_nodes(g2)) and
             set(gt_int_edges(g1)) == set(gt_int_edges(g2)))
+
+
+def gt2nk(gt_g):
+    """convert from `graph_tool.Graph` to `Networkit.Graph`
+    """
+    nk_g = NGraph(n=gt_g.num_vertices(), directed=False)
+    for e in gt_g.edges():
+        nk_g.addEdge(int(e.source()), int(e.target()))
+    return nk_g

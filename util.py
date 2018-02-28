@@ -1,3 +1,4 @@
+from graph_tool import Graph, GraphView
 from itertools import combinations
 
 
@@ -6,7 +7,12 @@ def sort_pair(e):
 
 
 def complementary_edges(g):
-    all_edges = set(map(sort_pair, combinations(g.nodes(), 2)))
+    if isinstance(g, Graph) or isinstance(g, GraphView):
+        nodes = list(map(int, g.vertices()))
+    else:
+        nodes = g.nodes()
+
+    all_edges = set(map(sort_pair, combinations(nodes, 2)))
     return all_edges - set(map(sort_pair, g.edges()))
 
 

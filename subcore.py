@@ -1,4 +1,5 @@
-from graph_tool import GraphView
+import random
+from graph_tool import GraphView, Graph
 from graph_helpers import (edge_induced_subgraph,
                            node_induced_subgraph,
                            maximal_matching)
@@ -30,8 +31,8 @@ def partition_promotable_nodes(nodes, cand_edges):
     return node_set.intersection(nodes_coverable), node_set.difference(nodes_coverable)
 
 
-def promote_subcore_by_maximal_matching(g, subcore_nodes, cand_edges, kcore):
-    """promote as many nodes in subcore as possible using cand_edges by maximal matching
+def edges_to_promote_subcore_by_maximal_matching(g, subcore_nodes, cand_edges, kcore):
+    """get the edges to promote as many nodes in subcore as possible using cand_edges by maximal matching
 
     return:
     - the selected edges
@@ -48,15 +49,38 @@ def promote_subcore_by_maximal_matching(g, subcore_nodes, cand_edges, kcore):
     return edges, set(promotable_nodes) - promoted
     
 
-def promote_subcore(g, subcore_nodes, cand_edges, kcore):
+def edges_to_promote_subcore(g, subcore_nodes, cand_edges, kcore):
     """
     given `subcore_nodes`, promote them to the next core
     """
-
-    ret_edges, unpromoted = promote_subcore_by_maximal_matching(
-        g, subcore_nodes, cand_edges, kcore)
+    cand_edge_graph = Graph(directed=False)
+    cand_edge_graph.add_vertex(g.num_vertices())
+    cand_edge_graph.add_edge_list(cand_edges)
     
-    for v in unpromoted:
-        pass  # TODO
+    ret_edges, unpromoted = edges_to_promote_subcore_by_maximal_matching(
+        g, subcore_nodes, cand_edges, kcore)
 
+    print('edges by maximal matching:', ret_edges)
+    print('unpromoted:', unpromoted)
+
+    for v in unpromoted:
+        print('promoting {}'.format(v))
+        out_edges = cand_edge_graph.vertex(v).out_edges()
+        edges_subset = []
+        for e in out_edges:
+            s, t = map(int, [e.source(), e.target()])
+            if kcore[s] < kcore[t]:  # focus on higher-core edges
+                edges_subset.append((s, t))
+        print('cand edges', edges_subset)
+        
+        if len(edges_subset) == 0:
+            print('fail to promote, abort')
+            # ABORT: impossible to promote the whole subcore
+            return None
+        else:
+            e = random.choice(edges_subset)
+            print('selected edge', e)
+            # cand_edge_graph.remove_edge(cand_edge_graph.edge(*e_star))
+            ret_edges.append(e)
+    
     return ret_edges
