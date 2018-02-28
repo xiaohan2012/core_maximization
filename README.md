@@ -4,6 +4,8 @@
 # todo
 
 - [X] implement `PROMOTE-SUBCORE` (Algorithm 6)
+- [ ] get the subcore list
+- [ ] how to re-build networkit: https://networkit.iti.kit.edu/api/DevGuide.html#unit-tests-and-testing
 - [ ] implement `SUBCORE-GREEDY` (Algorithm 7)
   - need to specifiy the  cache update mechanism (where "details omitted")
 - [ ] cache usage and update for `GREEDY`
@@ -23,4 +25,5 @@ note that `V_1 | V_2 = V(subcore)` and `V_1 & V_2 = \emptyset`
 1. `\sum |V_1| / \sum (|V_1| + |V_2|)`: saturation rate overall
 2. `\mean (|V_1| / (|V_1| + |V_2|))`: average saturation rate
    - the higher the above ratios are, the fewer edges we need to promote subcores
+
 
