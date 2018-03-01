@@ -4,8 +4,8 @@
 # todo
 
 - [X] implement `PROMOTE-SUBCORE` (Algorithm 6)
-- [ ] get the subcore list
-- [ ] how to re-build networkit: https://networkit.iti.kit.edu/api/DevGuide.html#unit-tests-and-testing
+- [X] get the subcore list
+- [X] how to re-build networkit: https://networkit.iti.kit.edu/api/DevGuide.html#unit-tests-and-testing
 - [ ] implement `SUBCORE-GREEDY` (Algorithm 7)
   - need to specifiy the  cache update mechanism (where "details omitted")
 - [ ] cache usage and update for `GREEDY`

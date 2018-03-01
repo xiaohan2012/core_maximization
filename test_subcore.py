@@ -173,3 +173,6 @@ def test_edges_to_promote_subcore(input_name, cand_edges, expected_return):
         for v in subcore_nodes:
             assert (new_core[v] - old_core_number) == 1
             
+
+def test_subcore_greedy():
+    pass

@@ -1,4 +1,4 @@
-from fixtures import g, cand_edges
+from fixtures import house_graph_nk as g, cand_edges
 from brute_force import do_brute_force
 
 

@@ -3,6 +3,7 @@ from graph_tool import Graph
 from graph_tool.generation import complete_graph
 from graph_tool.topology import kcore_decomposition
 
+from fixtures import house_graph
 from graph_helpers import (edge_induced_subgraph, node_induced_subgraph,
                            gt_int_nodes, gt_int_edges,
                            graph_equal, maximal_matching,
@@ -16,32 +17,6 @@ def g():
     G = Graph(directed=False)
     G.add_vertex(4)
     return G
-
-
-@pytest.fixture
-def house_graph():
-    """
-       0
-      / \
-     /   \
-    /     \
-    1 --- 2
-    |    /|
-    |   / |
-    | /   |
-    |/    |
-    3 --- 4 --- 5
-
-    node       : 0  1  2  3  4  5
-    core number: 2  2  2  2  2  1
-    """
-
-    g = Graph(directed=False)
-    g.add_vertex(6)
-    edges = [(0, 1), (0, 2), (1, 3), (2, 4), (1, 2), (3, 4), (2, 3), (4, 5)]
-    g.add_edge_list(edges)
-
-    return g
 
 
 @pytest.mark.parametrize("edges, nodes", [([(0, 1)], [0, 1]),

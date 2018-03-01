@@ -1,6 +1,6 @@
 from greedy_noninc import do_greedy
 
-from fixtures import g, cand_edges
+from fixtures import house_graph_nk as g, cand_edges
 
 
 def test_k1(g, cand_edges):
