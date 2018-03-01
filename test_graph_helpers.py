@@ -1,11 +1,12 @@
 import pytest
 from graph_tool import Graph
 from graph_tool.generation import complete_graph
+from graph_tool.topology import kcore_decomposition
 
 from graph_helpers import (edge_induced_subgraph, node_induced_subgraph,
                            gt_int_nodes, gt_int_edges,
                            graph_equal, maximal_matching,
-                           gt2nk)
+                           gt2nk, get_subcores)
 
 
 @pytest.fixture
@@ -15,6 +16,32 @@ def g():
     G = Graph(directed=False)
     G.add_vertex(4)
     return G
+
+
+@pytest.fixture
+def house_graph():
+    """
+       0
+      / \
+     /   \
+    /     \
+    1 --- 2
+    |    /|
+    |   / |
+    | /   |
+    |/    |
+    3 --- 4 --- 5
+
+    node       : 0  1  2  3  4  5
+    core number: 2  2  2  2  2  1
+    """
+
+    g = Graph(directed=False)
+    g.add_vertex(6)
+    edges = [(0, 1), (0, 2), (1, 3), (2, 4), (1, 2), (3, 4), (2, 3), (4, 5)]
+    g.add_edge_list(edges)
+
+    return g
 
 
 @pytest.mark.parametrize("edges, nodes", [([(0, 1)], [0, 1]),
@@ -67,3 +94,13 @@ def test_gt2nk():
     assert gt_g.num_vertices() == nk_g.numberOfNodes()
     assert gt_g.num_edges() == nk_g.numberOfEdges()
     
+
+@pytest.mark.parametrize("edges_to_add, expected",
+                         [([], [{0, 1, 2, 3, 4}, {5}]),
+                          ([(2, 5)], [{0, 1, 2, 3, 4, 5}])
+                         ])
+def test_get_subcores(house_graph, edges_to_add, expected):
+    house_graph.add_edge_list(edges_to_add)
+    kcore = kcore_decomposition(house_graph)
+    subcores = get_subcores(house_graph, kcore)
+    assert subcores == expected

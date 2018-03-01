@@ -1,5 +1,6 @@
 from graph_tool import Graph, GraphView
 from networkit import Graph as NGraph
+from graph_tool.topology import kcore_decomposition
 
 from itertools import combinations
 
@@ -117,3 +118,27 @@ def gt2nk(gt_g):
     for e in gt_g.edges():
         nk_g.addEdge(int(e.source()), int(e.target()))
     return nk_g
+
+
+def get_subcores(g, kcore):
+    """get the subcores by running kcore-guided BFS
+    """
+    visited = {v: False for v in g.vertices()}
+    subcores = []
+    for v in g.vertices():
+        if visited[v]:
+            continue
+        
+        subcore = {int(v)}
+        queue = [v]
+        while len(queue) > 0:
+            v = queue.pop(0)
+            visited[v] = True
+            for u in v.out_neighbours():
+                if not visited[u] and kcore[u] == kcore[v]:
+                    visited[u] = True
+                    queue.append(u)
+                    subcore.add(int(u))
+                
+        subcores.append(subcore)
+    return subcores
