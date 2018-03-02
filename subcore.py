@@ -145,7 +145,7 @@ def subcore_greedy(g, cand_edges, B):
             print('new core number', kcore.a)
             subcores = get_subcores(g, kcore)
             print('new subcores', subcores)
-            # cand_edges -= set(sc2edges[best_sc])
+            cand_edges -= set(sc2edges[best_sc])
         else:
             # no promotable subcores
             break
