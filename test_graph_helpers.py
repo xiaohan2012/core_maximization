@@ -55,7 +55,13 @@ def test_node_induced_subgraph_non_existing_nodes(g):
                           ([(0, 1), (2, 3)], [(0, 1), (2, 3)], []),
                           ([(0, 1), (1, 2), (2, 3)], [(0, 1), (2, 3)], []),
                           # case 4: inspired from house_graph
-                          ([(0, 3), (1, 3)], [(0, 3)], [1, 2])])
+                          ([(0, 3), (1, 3)], [(0, 3)], [1, 2]),
+
+                          # case 5:
+                          # a case that greedy does not give maximum matching
+                          # if starts by matching 1, then it should match all nodes
+                          ([(0, 2), (0, 3, (1, 2))], [(0, 2)], [1, 3])
+                         ])
 def test_maximal_matching_simple(g, graph_edges, expected_edges, expected_unmatched):
     g.add_edge_list(graph_edges)
     actual_edges, unmatched = maximal_matching(g, return_unmatched=True)
