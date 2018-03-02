@@ -1,3 +1,4 @@
+import itertools
 from graph_tool import Graph, GraphView
 from networkit import Graph as NGraph
 from graph_tool.topology import kcore_decomposition
@@ -54,6 +55,7 @@ def edge_induced_subgraph(g, edges):
     """
     vfilt = g.new_vertex_property('bool')
     node_subset = {u for e in edges for u in e}
+    vfilt.a = False
     for v in node_subset:
         vfilt[v] = True
 
@@ -62,7 +64,6 @@ def edge_induced_subgraph(g, edges):
     new_g.set_vertex_filter(vfilt)
     new_g.add_edge_list(edges)
     return new_g
-
 
 def has_vertex(g, i):
     # to avoid calling g.vertex, which is heavy
@@ -75,7 +76,7 @@ def has_vertex(g, i):
 
 def node_induced_subgraph(g, nodes):
     vfilt = g.new_vertex_property('bool')
-
+    vfilt.a = False
     for v in nodes:
         if has_vertex(g, v):
             vfilt[v] = True
@@ -84,18 +85,35 @@ def node_induced_subgraph(g, nodes):
 
 def maximal_matching(g, return_unmatched=True):
     """given graph `g`, perform greedy matching algorithm, which gives factor-2 approximation"""
+    print(g)
     edges = []
     to_match = set(g.vertices())
     unmatched = []
     while len(to_match) > 0:
-        v = next(iter(to_match))
+        v = next(iter(to_match))  # take a element from the set
+        v = g.vertex(int(v))  # need to refresh because graph changes after one step of matching
+        print('trying to match', v)
         try:
             e = next(v.out_edges())
             
             s, t = e.source(), e.target()
-            edges.append(tuple(sorted((int(s), int(t)))))
+
+            print('selected edge', sort_pair([int(s), int(t)]))
+            edges.append(sort_pair([int(s), int(t)]))
             to_match.remove(s)
             to_match.remove(t)
+
+            # hide matched nodes
+            vfilt = g.get_vertex_filter()[0]
+            if vfilt is None:
+                vfilt = g.new_vertex_property('bool')
+                vfilt.a = True
+            for v in [s, t]:
+                vfilt[int(v)] = False
+            g.set_vertex_filter(vfilt)
+            print('g after hiding', g)
+            print('g.nodes() after hiding', gt_int_nodes(g))
+            print('g.edges() after hiding', gt_int_edges(g))
         except StopIteration:
             to_match.remove(v)
             unmatched.append(int(v))

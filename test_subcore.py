@@ -4,10 +4,11 @@ from graph_tool import load_graph, Graph
 from graph_tool.generation import complete_graph
 from graph_tool.topology import kcore_decomposition
 
-from graph_helpers import graph_equal, normalize_edges
+from graph_helpers import graph_equal, normalize_edges, complementary_edges
+from fixtures import house_graph
 from subcore import (find_nodes_to_promote, partition_promotable_nodes,
                      edges_to_promote_subcore_by_maximal_matching,
-                     edges_to_promote_subcore)
+                     edges_to_promote_subcore, subcore_greedy)
 
 
 def karate_input():
@@ -28,6 +29,11 @@ def clique_input():
     g = complete_graph(3, directed=False)
     g.add_vertex()  # a singleton to attach edges
     return g, kcore_decomposition(g), [0, 1, 2]
+
+
+def house_input():
+    g = house_graph()
+    return g, kcore_decomposition(g), [5]
 
 
 def fake_input1():
@@ -61,6 +67,8 @@ def get_input(name):
         return clique_input()
     elif name == 'fake1':
         return fake_input1()
+    elif name == 'house':
+        return house_input()
 
 
 def test_find_nodes_to_promote():
@@ -91,23 +99,31 @@ def test_partition_promotable_nodes(nodes, cand_edges, expected_partition):
     assert partition == expected_partition
 
 
-@pytest.mark.parametrize('cand_edges, selected_edges_true, unpromoted_true',
+@pytest.mark.parametrize('input_name, cand_edges, selected_edges_true, unpromoted_true',
                          [
                              # case 1: promote success
-                             ([(0, 3), (1, 3), (0, 2)],
+                             ('line',
+                              [(0, 3), (1, 3), (0, 2)],
                               [(0, 3)],
                               set()),
                              # case 2: impossible to promote
-                             ([(1, 3), (0, 2)],
+                             ('line', [(1, 3), (0, 2)],
                               [],
                               {0, 3}),
                              # case 3: no edges
-                             ([],
+                             ('line', [],
                               [],
                               {0, 3}),
+
+                             # case 4: house, subcore with one node
+                             ('house', [(0, 5)], [], {5}),
+
+                             # case 5: clique, all nodes are unpromotable
+                             ('clique', [], [], {0, 1, 2})
                          ])
-def test_edges_to_promote_subcore_by_maximal_matching(cand_edges, selected_edges_true, unpromoted_true):
-    input_data = get_input('line')
+def test_edges_to_promote_subcore_by_maximal_matching(
+        input_name, cand_edges, selected_edges_true, unpromoted_true):
+    input_data = get_input(input_name)
     g, kcore, subcore_nodes = input_data
     old_g = Graph(g)  # copy it
     
@@ -143,8 +159,11 @@ def test_edges_to_promote_subcore_by_maximal_matching(cand_edges, selected_edges
                              # case 7: clique, impossible to promote with insufficient num. of edges
                              ('clique', [(0, 3), (1, 3)], None),
 
-                             # case 8: clique, connect to a lower core node
-                             ('clique', [(0, 3), (1, 3), (2, 3)], [(0, 3), (1, 3), (2, 3)])
+                             # # case 8: clique, connect to a lower core node
+                             # ('clique', [(0, 3), (1, 3), (2, 3)], [(0, 3), (1, 3), (2, 3)]),
+                             # case 9: house, on the singleton subcore
+                             ('house', [(0, 5)], [(0, 5)])
+                             
                          ])
 def test_edges_to_promote_subcore(input_name, cand_edges, expected_return):
     input_data = get_input(input_name)
@@ -174,5 +193,22 @@ def test_edges_to_promote_subcore(input_name, cand_edges, expected_return):
             assert (new_core[v] - old_core_number) == 1
             
 
-def test_subcore_greedy():
-    pass
+@pytest.mark.parametrize('cand_edges, B, expected',
+                         [
+                             # case 1:
+                             (None, 1, [(0, 4)]),
+
+                             # case 2
+                             (None, 2, [(0, 4), (5, 1)]),
+
+                             # case 3
+                             (None, 3, [(0, 4), (1, 4), (0, 3)]),
+                         ])
+def test_subcore_greedy(house_graph, cand_edges, B, expected):
+    if cand_edges is None:  # by default, complement set
+        cand_edges = complementary_edges(house_graph)
+        cand_edges -= {(0, 5), (2, 5), (3, 5)}  # to avoid ambiguity
+        # print('cand_edges', cand_edges)
+        
+    actual = subcore_greedy(house_graph, cand_edges, B)
+    assert set(actual) == set(expected)

@@ -53,7 +53,9 @@ def test_node_induced_subgraph_non_existing_nodes(g):
 @pytest.mark.parametrize("graph_edges, expected_edges, expected_unmatched",
                          [([(0, 1)], [(0, 1)], [2, 3]),
                           ([(0, 1), (2, 3)], [(0, 1), (2, 3)], []),
-                          ([(0, 1), (1, 2), (2, 3)], [(0, 1), (2, 3)], [])])
+                          ([(0, 1), (1, 2), (2, 3)], [(0, 1), (2, 3)], []),
+                          # case 4: inspired from house_graph
+                          ([(0, 3), (1, 3)], [(0, 3)], [1, 2])])
 def test_maximal_matching_simple(g, graph_edges, expected_edges, expected_unmatched):
     g.add_edge_list(graph_edges)
     actual_edges, unmatched = maximal_matching(g, return_unmatched=True)
