@@ -97,6 +97,6 @@ def test_get_subcores(house_graph, edges_to_add, expected):
                           ('house', [2, 3, 4, 3, 2, 1])
                          ])
 def test_get_degree_ge(input_name, expected):
-    g, kcore, _ = get_input(input_name)
+    g, kcore, _, _ = get_input(input_name)
     degge = get_degree_ge(g, kcore)
     assert list(degge.a) == expected

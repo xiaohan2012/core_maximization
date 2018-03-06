@@ -120,6 +120,7 @@ def subcore_greedy(g, cand_edges, B, debug=False, log=False, show_progress=True)
 
     Note: without cache yet
     """
+    cand_edges = set(cand_edges)
     ret_edges = []
 
     if log:
