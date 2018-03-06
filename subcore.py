@@ -135,6 +135,8 @@ def subcore_greedy(g, cand_edges, B, debug=False, log=False, show_progress=True)
     B_rem = B
     iter_n = 0
     while B_rem > 0:
+        iter_n += 1
+        
         sc2score = {}
         sc2edges = {}
 
@@ -164,11 +166,12 @@ def subcore_greedy(g, cand_edges, B, debug=False, log=False, show_progress=True)
                 print('#' * 25)
                 print('SC_GREEDY: decided to promote {} using edges {}'.format(best_sc, sc2edges[best_sc]))
 
-            if log:
-                log['edges_list'].append(sc2edges[best_sc])
-
             B_rem -= len(sc2edges[best_sc])
             ret_edges += sc2edges[best_sc]
+
+            if log:
+                print('selected {} edges, remaining {}'.format(sc2edges[best_sc], B_rem))
+                log['edges_list'].append(sc2edges[best_sc])
 
             # update graph, core and degge
             # NOTE: non-incremental
