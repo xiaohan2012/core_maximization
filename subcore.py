@@ -16,6 +16,7 @@ def find_nodes_to_promote(g, subcore_nodes, kcore):
     these nodes are potentially promotable by adding **intra-subcore** edges
 
     so for a subcore with a single node, that node is not returned
+    because it relies on **inter-subcore** edges
     """
     vfilt = g.new_vertex_property('bool')
     for v in subcore_nodes:
