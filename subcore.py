@@ -1,5 +1,6 @@
 import random
-from graph_tool import GraphView, Graph
+from graph_tool import Graph
+from tqdm import tqdm
 from graph_tool.topology import kcore_decomposition
 from graph_helpers import (edge_induced_subgraph,
                            node_induced_subgraph,
@@ -113,34 +114,45 @@ def edges_to_promote_subcore(g, subcore_nodes, cand_edges, kcore, degge, debug=F
     return ret_edges
 
 
-def subcore_greedy(g, cand_edges, B, debug=False):
+def subcore_greedy(g, cand_edges, B, debug=False, log=False, show_progress=True):
     """
     return edges to promote nodes in `g` by calling `edges_to_promote_subcore` greedily
 
     Note: without cache yet
     """
     ret_edges = []
+
+    if log:
+        log = {'edges_list': []}
     
     kcore = kcore_decomposition(g)
     degge = get_degree_ge(g, kcore)
     subcores = get_subcores(g, kcore)
     # print('subcores', subcores)
-
+    
     subcores = [tuple(sorted(sc)) for sc in subcores]
     B_rem = B
+    iter_n = 0
     while B_rem > 0:
         sc2score = {}
         sc2edges = {}
 
-        for sc in subcores:
+        if show_progress:
+            print('iter {}'.format(iter_n))
+            iters = tqdm(subcores)
+        else:
+            iters = subcores
+
+        for sc in iters:
             edges = edges_to_promote_subcore(g, sc, cand_edges, kcore,
-                                             degge, debug=True)
+                                             degge, debug=False)
             if edges is not None and B_rem >= len(edges):
                 sc = tuple(sorted(sc))
                 # only promotable subcores under current budget
 
                 if debug:
                     print('SC_GREEDY: considering {}, edges to promote it: {}'.format(sc, edges))
+                    # print('--' * 10)
 
                 sc2edges[sc] = edges
                 sc2score[sc] = len(sc) / len(edges)
@@ -150,6 +162,10 @@ def subcore_greedy(g, cand_edges, B, debug=False):
             if debug:
                 print('#' * 25)
                 print('SC_GREEDY: decided to promote {} using edges {}'.format(best_sc, sc2edges[best_sc]))
+
+            if log:
+                log['edges_list'].append(sc2edges[best_sc])
+
             B_rem -= len(sc2edges[best_sc])
             ret_edges += sc2edges[best_sc]
 
@@ -169,5 +185,8 @@ def subcore_greedy(g, cand_edges, B, debug=False):
             # no promotable subcores
             break
         print('-' * 20)
-        
-    return ret_edges
+
+    if log:
+        return ret_edges, log
+    else:
+        return ret_edges

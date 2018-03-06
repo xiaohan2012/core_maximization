@@ -255,5 +255,6 @@ def test_subcore_greedy(house_graph, cand_edges, B, expected):
         cand_edges -= {(0, 5), (2, 5), (3, 5)}  # to avoid ambiguity
         # print('cand_edges', cand_edges)
         
-    actual = subcore_greedy(house_graph, cand_edges, B, debug=True)
+    actual, log = subcore_greedy(house_graph, cand_edges, B, debug=True, log=True)
+    print(log)
     assert set(actual) == set(expected)

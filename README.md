@@ -31,3 +31,4 @@ note that `V_1 | V_2 = V(subcore)` and `V_1 & V_2 = \emptyset`
 
 - for unpromoted nodes, subcore can use `greedy` as a subroutine to maximize gain
   - currently, random is used
+- evaluating the gain of each subcore can be done in parallel
