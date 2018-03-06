@@ -34,20 +34,25 @@ def main():
     model.fit(adj)
 
     # recommend n_recommendations users for each user
-    recommend_edges = []
+    recommended_edges = []
     for u in range(g.num_vertices()):
         recommendations = model.recommend(u, adj, N=n_recommendations)
-        recommend_edges += [tuple(sorted((u, v))) for v, _ in recommendations]
+        recommended_edges += [tuple(sorted((u, v))) for v, _ in recommendations]
 
     output_path = 'data/{}/recommended_edges_N{}.pkl'.format(graph_name, n_recommendations)
+
+    # filter out self-loops
+    recommended_edges = [(u, v)
+                         for (u, v) in recommended_edges
+                         if u != v]
+    for u, v in recommended_edges:
+        assert u != v
+        assert g.edge(u, v) is None, (u, v)
+
     pkl.dump(
-        recommend_edges,
-        open(output_path, 'wb'))
-
-    # for u, v in recommend_edges:
-    #     assert g.edge(u, v) is None, (u, v)
-
-    print('recommended {} edges'.format(len(set(recommend_edges))))
+        recommended_edges,
+        open(output_path, 'wb'))        
+    print('recommended {} edges'.format(len(set(recommended_edges))))
     print('dumped to {}'.format(output_path))
 
 if __name__ == '__main__':
