@@ -83,22 +83,25 @@ def node_induced_subgraph(g, nodes):
     return GraphView(g, vfilt=vfilt)
 
 
-def maximal_matching(g, return_unmatched=True):
+def maximal_matching(g, return_unmatched=True, debug=False):
     """given graph `g`, perform greedy matching algorithm, which gives factor-2 approximation"""
-    print(g)
+    # print(g)
     edges = []
     to_match = set(g.vertices())
     unmatched = []
     while len(to_match) > 0:
         v = next(iter(to_match))  # take a element from the set
         v = g.vertex(int(v))  # need to refresh because graph changes after one step of matching
-        print('trying to match', v)
+        if debug:
+            print('MAX_MATCH: trying to match', v)
         try:
             e = next(v.out_edges())
             
             s, t = e.source(), e.target()
 
-            print('selected edge', sort_pair([int(s), int(t)]))
+            if debug:
+                print('MAX_MATCH: selected edge', sort_pair([int(s), int(t)]))
+
             edges.append(sort_pair([int(s), int(t)]))
             to_match.remove(s)
             to_match.remove(t)
@@ -111,9 +114,11 @@ def maximal_matching(g, return_unmatched=True):
             for v in [s, t]:
                 vfilt[int(v)] = False
             g.set_vertex_filter(vfilt)
-            print('g after hiding', g)
-            print('g.nodes() after hiding', gt_int_nodes(g))
-            print('g.edges() after hiding', gt_int_edges(g))
+
+            if debug:
+                # print('MAX_MATCH: g after hiding', g)
+                print('MAX_MATCH: g.nodes() after hiding', gt_int_nodes(g))
+                print('MAX_MATCH: g.edges() after hiding', gt_int_edges(g))
         except StopIteration:
             to_match.remove(v)
             unmatched.append(int(v))
@@ -160,3 +165,22 @@ def get_subcores(g, kcore):
                 
         subcores.append(subcore)
     return subcores
+
+
+def get_degree_ge(g, kcore):
+    """
+    get deg^{\ge},
+    deg^{\ge} is the degree received from higher-core nodes
+
+    Return:
+
+    PropertyMap
+    """
+    degge = g.new_vertex_property('int')
+    degge.a = 0
+    for u in g.vertices():
+        for v in u.all_neighbours():
+            if kcore[u] <= kcore[v]:
+                degge[u] += 1
+    return degge
+    

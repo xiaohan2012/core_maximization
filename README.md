@@ -26,3 +26,8 @@ note that `V_1 | V_2 = V(subcore)` and `V_1 & V_2 = \emptyset`
 2. `\mean (|V_1| / (|V_1| + |V_2|))`: average saturation rate
    - the higher the above ratios are, the fewer edges we need to promote subcores
    - for grqc: mean 28%, median 33%
+
+# idea
+
+- for unpromoted nodes, subcore can use `greedy` as a subroutine to maximize gain
+  - currently, random is used

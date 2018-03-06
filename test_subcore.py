@@ -4,7 +4,8 @@ from graph_tool import load_graph, Graph
 from graph_tool.generation import complete_graph
 from graph_tool.topology import kcore_decomposition
 
-from graph_helpers import graph_equal, normalize_edges, complementary_edges
+from graph_helpers import (graph_equal, normalize_edges,
+                           complementary_edges, get_degree_ge)
 from fixtures import house_graph
 from subcore import (find_nodes_to_promote, partition_promotable_nodes,
                      edges_to_promote_subcore_by_maximal_matching,
@@ -15,25 +16,34 @@ def karate_input():
     g = load_graph('data/karate.gml')
     core = kcore_decomposition(g)
     subcore_nodes = list(np.nonzero(core.a == 4)[0])
-    return g, core, subcore_nodes
+    return g, core, get_degree_ge(g, core), subcore_nodes
 
 
 def line_input():
     g = Graph(directed=False)
     g.add_vertex(4)
     g.add_edge_list([(0, 1), (1, 2), (2, 3)])
-    return g, kcore_decomposition(g), [0, 1, 2, 3]
+    core = kcore_decomposition(g)
+    return g, core, get_degree_ge(g, core), [0, 1, 2, 3]
 
 
 def clique_input():
     g = complete_graph(3, directed=False)
     g.add_vertex()  # a singleton to attach edges
-    return g, kcore_decomposition(g), [0, 1, 2]
+    core = kcore_decomposition(g)
+    return g, core, get_degree_ge(g, core), [0, 1, 2]
 
 
 def house_input():
     g = house_graph()
-    return g, kcore_decomposition(g), [5]
+    core = kcore_decomposition(g)
+    return g, core, get_degree_ge(g, core), [5]
+
+
+def house_input_2():
+    g = house_graph()
+    core = kcore_decomposition(g)
+    return g, core, get_degree_ge(g, core), [0, 1, 2, 3, 4]
 
 
 def fake_input1():
@@ -55,8 +65,26 @@ def fake_input1():
     core = kcore_decomposition(g)
     assert list(core.a) == [4, 4, 4, 4, 4, 2, 2, 2, 2]
     subcore_nodes = [5, 6, 7, 8]
-    return g, core, subcore_nodes
+    return g, core, get_degree_ge(g, core), subcore_nodes
 
+
+def fake_input2():
+    """
+    
+    0 -- 1 -- 2 -- 3 -- 5 -- 6
+               \  /
+                 4
+    the goal is to promote sc to core 3
+    """
+    g = Graph(directed=False)
+    g.add_vertex(7)
+    g.add_edge_list([(0, 1), (1, 2), (2, 3), (2, 4),
+                     (3, 4), (3, 5), (5, 6)])
+    core = kcore_decomposition(g)
+    assert list(core.a) == [1, 1, 2, 2, 2, 1, 1]
+    subcore_nodes = [0, 1]
+    return g, core, get_degree_ge(g, core), subcore_nodes
+    
 
 def get_input(name):
     if name == 'karate':
@@ -67,17 +95,27 @@ def get_input(name):
         return clique_input()
     elif name == 'fake1':
         return fake_input1()
+    elif name == 'fake2':
+        return fake_input2()
     elif name == 'house':
         return house_input()
+    elif name == 'house2':
+        return house_input_2()
 
 
-def test_find_nodes_to_promote():
-    input_data = get_input('karate')
-    g, core, subcore_nodes = input_data
-    promotable_nodes_expected = {7, 30, 32, 33}
+@pytest.mark.parametrize('input_name, expected_output',
+                         [
+                             ('karate', {7, 30, 32, 33}),
+                             ('house', {5}),
+                             ('house2', {0, 4}),
+                             ('fake2', {0})
+                         ])
+def test_find_nodes_to_promote(input_name, expected_output):
+    input_data = get_input(input_name)
+    g, core, degge, subcore_nodes = input_data
 
-    promotable_nodes = find_nodes_to_promote(g, subcore_nodes, core)
-    assert set(promotable_nodes) == promotable_nodes_expected
+    promotable_nodes = find_nodes_to_promote(g, subcore_nodes, core, degge)
+    assert set(promotable_nodes) == expected_output
 
 
 @pytest.fixture
@@ -119,16 +157,19 @@ def test_partition_promotable_nodes(nodes, cand_edges, expected_partition):
                              ('house', [(0, 5)], [], {5}),
 
                              # case 5: clique, all nodes are unpromotable
-                             ('clique', [], [], {0, 1, 2})
+                             ('clique', [], [], {0, 1, 2}),
+
+                             # case 6: fake input 2, not promotable by maximal matching
+                             ('fake2', [(0, 2), (0, 3)], [], {0})
                          ])
 def test_edges_to_promote_subcore_by_maximal_matching(
         input_name, cand_edges, selected_edges_true, unpromoted_true):
     input_data = get_input(input_name)
-    g, kcore, subcore_nodes = input_data
+    g, kcore, degge, subcore_nodes = input_data
     old_g = Graph(g)  # copy it
     
     selected_edges, unpromoted = edges_to_promote_subcore_by_maximal_matching(
-        g, subcore_nodes, cand_edges, kcore)
+        g, subcore_nodes, cand_edges, kcore, degge)
 
     assert selected_edges == selected_edges_true
     assert unpromoted == unpromoted_true
@@ -162,18 +203,22 @@ def test_edges_to_promote_subcore_by_maximal_matching(
                              # # case 8: clique, connect to a lower core node
                              # ('clique', [(0, 3), (1, 3), (2, 3)], [(0, 3), (1, 3), (2, 3)]),
                              # case 9: house, on the singleton subcore
-                             ('house', [(0, 5)], [(0, 5)])
+                             ('house', [(0, 5)], [(0, 5)]),
+
+                             # case 10, [(0, 6)] gives better result however,
+                             # by subcore algorithm, (0, 2) is returned
+                             ('fake2', [(0, 2), (0, 6)], [(0, 2)])
                              
                          ])
 def test_edges_to_promote_subcore(input_name, cand_edges, expected_return):
     input_data = get_input(input_name)
     
-    g, core, subcore_nodes = input_data
+    g, core, degge, subcore_nodes = input_data
 
     old_g = Graph(g)  # copy it
     old_core_number = core[subcore_nodes[0]]
 
-    ret = edges_to_promote_subcore(g, subcore_nodes, cand_edges, core)
+    ret = edges_to_promote_subcore(g, subcore_nodes, cand_edges, core, degge)
 
     if ret is not None and expected_return is not None:
         assert normalize_edges(ret) == normalize_edges(expected_return)
@@ -210,5 +255,5 @@ def test_subcore_greedy(house_graph, cand_edges, B, expected):
         cand_edges -= {(0, 5), (2, 5), (3, 5)}  # to avoid ambiguity
         # print('cand_edges', cand_edges)
         
-    actual = subcore_greedy(house_graph, cand_edges, B)
+    actual = subcore_greedy(house_graph, cand_edges, B, debug=True)
     assert set(actual) == set(expected)

@@ -7,7 +7,10 @@ from fixtures import house_graph
 from graph_helpers import (edge_induced_subgraph, node_induced_subgraph,
                            gt_int_nodes, gt_int_edges,
                            graph_equal, maximal_matching,
-                           gt2nk, get_subcores)
+                           gt2nk, get_subcores,
+                           get_degree_ge)
+
+from test_subcore import get_input
 
 
 @pytest.fixture
@@ -87,3 +90,13 @@ def test_get_subcores(house_graph, edges_to_add, expected):
     kcore = kcore_decomposition(house_graph)
     subcores = get_subcores(house_graph, kcore)
     assert subcores == expected
+
+
+@pytest.mark.parametrize("input_name, expected",
+                         [('line', [1, 2, 2, 1]),
+                          ('house', [2, 3, 4, 3, 2, 1])
+                         ])
+def test_get_degree_ge(input_name, expected):
+    g, kcore, _ = get_input(input_name)
+    degge = get_degree_ge(g, kcore)
+    assert list(degge.a) == expected
