@@ -50,8 +50,8 @@ def main():
         assert g.edge(u, v) is None, (u, v)
 
     pkl.dump(
-        recommended_edges,
-        open(output_path, 'wb'))        
+        set(recommended_edges),
+        open(output_path, 'wb'))
     print('recommended {} edges'.format(len(set(recommended_edges))))
     print('dumped to {}'.format(output_path))
 
