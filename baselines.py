@@ -22,3 +22,12 @@ class MFRecommender():
         
     def get_top_k_edges(self, cand_edges, k=100):
         return sorted(cand_edges, key=lambda e: self.get_edge_score(*e), reverse=True)[:k]
+
+
+class RandomRecommender():
+    def get_top_k_edges(self, cand_edges, k=100):
+        cand_edges = list(cand_edges)
+        ids = np.arange(len(cand_edges))
+        sel_ids = np.random.choice(ids, k, replace=False)
+        return [cand_edges[i] for i in sel_ids]
+    
