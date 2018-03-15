@@ -24,6 +24,7 @@ def cand_edges():
 def test_mf_recommender(g, cand_edges):
     recommender = MFRecommender(g)
     recommender.train_model()
-    rec_edges = recommender.get_top_k_edges(cand_edges)
+    rec_edges = recommender.get_top_k_edges(cand_edges, 100)
+    assert len(rec_edges) == 100
     for e1, e2 in zip(rec_edges, rec_edges[1:]):
         assert recommender.get_edge_score(*e1) > recommender.get_edge_score(*e2)

@@ -20,5 +20,5 @@ class MFRecommender():
     def recommend(self, u, k=10):
         return self.model.recommend(u, self.adj, k)
         
-    def get_top_k_edges(self, cand_edges):
-        return sorted(cand_edges, key=lambda e: self.get_edge_score(*e), reverse=True)
+    def get_top_k_edges(self, cand_edges, k=100):
+        return sorted(cand_edges, key=lambda e: self.get_edge_score(*e), reverse=True)[:k]
