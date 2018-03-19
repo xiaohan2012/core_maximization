@@ -3,9 +3,11 @@
 import os
 import argparse
 import implicit
+import pickle as pkl
+
 from graph_tool import load_graph
 from graph_tool.spectral import adjacency
-import pickle as pkl
+from tqdm import tqdm
 
 
 def main():
@@ -32,22 +34,25 @@ def main():
 
     # train the model on a sparse matrix of item/user/confidence weights
     model.fit(adj)
+    print('model fitting done')
 
     # recommend n_recommendations users for each user
+    print('recommending...')
     recommended_edges = []
-    for u in range(g.num_vertices()):
+    for u in tqdm(range(g.num_vertices()), total=g.num_vertices()):
         recommendations = model.recommend(u, adj, N=n_recommendations)
         recommended_edges += [tuple(sorted((u, v))) for v, _ in recommendations]
 
     output_path = 'data/{}/recommended_edges_N{}.pkl'.format(graph_name, n_recommendations)
 
     # filter out self-loops
+    print('filtering out self-loops')
     recommended_edges = [(u, v)
-                         for (u, v) in recommended_edges
+                         for (u, v) in tqdm(recommended_edges)
                          if u != v]
-    for u, v in recommended_edges:
-        assert u != v
-        assert g.edge(u, v) is None, (u, v)
+    # for u, v in recommended_edges:
+    #     assert u != v
+    # assert g.edge(u, v) is None, (u, v)
 
     pkl.dump(
         set(recommended_edges),

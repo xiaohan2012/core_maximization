@@ -1,85 +1,59 @@
-
 # coding: utf-8
 
-# In[71]:
-
-
+import argparse
 import pickle as pkl
 import os
 
-from networkit import overview, Glist
+from networkit import Glist
 from graph_tool import load_graph
 from graph_tool.topology import kcore_decomposition
 from greedy_noninc import do_greedy
 from networkit.graphio import readGraph, Format
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('-g', '--graph', help='graph name')
+    parser.add_argument('-b', '--budget',
+                        type=int,
+                        help='number of edges to recommend')
+    parser.add_argument('-n', '--n_cand_edges_per_node',
+                        type=int,
+                        help='number of candidate edges per node')
 
-# In[59]:
+    args = parser.parse_args()
 
+    graph_name = args.graph
+    budget = args.budget
 
-graph_name = 'grqc'
-budget = 100
-g = readGraph('data/{}/graph.graphml'.format(graph_name), fileformat=Format.GraphML)
-g_gt = load_graph('data/{}/graph.gt'.format(graph_name))
+    g = readGraph('data/{}/graph.graphml'.format(graph_name), fileformat=Format.GraphML)
+    g_gt = load_graph('data/{}/graph.gt'.format(graph_name))
 
+    kcore = kcore_decomposition(g_gt)
+    print('sum of core', sum(kcore.a))
+    print('num edges', g.numberOfEdges())
 
-# In[62]:
+    glist = Glist(g)
+    prev_score = sum(glist.core)
+    print('prev_score={}'.format(sum(glist.core)))
 
+    cand_edges = pkl.load(open(
+        'data/{}/recommended_edges_N{}.pkl'.format(graph_name, args.n_cand_edges_per_node), 'rb'))
 
-kcore = kcore_decomposition(g_gt)
-print('sum of core', sum(kcore.a))
-print('num edges', g.numberOfEdges())
+    greedy_edges = do_greedy(g, budget, cand_edges, debug=False, log=False, show_progress=True)
 
+    output_dir = 'output/{}/greedy'.format(graph_name)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    output_path = os.path.join(output_dir, 'B{}-N{}.pkl'.format(budget, args.n_cand_edges_per_node))
+    print('result dumpted to', output_path)
+    pkl.dump(greedy_edges, open(
+        output_path, 'wb'))
 
-# In[50]:
+    core_before = sum(kcore.a)
 
+    g_gt.add_edge_list(greedy_edges)
 
-glist = Glist(g)
-prev_score = sum(glist.core)
-print('prev_score={}'.format(sum(glist.core)))
+    core_after = sum(kcore_decomposition(g_gt).a)
 
-
-# In[51]:
-
-
-cand_edges = pkl.load(open('data/{}/recommended_edges_N10.pkl'.format(graph_name), 'rb'))
-
-
-# In[53]:
-
-
-greedy_edges = do_greedy(g, budget, cand_edges, debug=False, log=False, show_progress=True)
-
-
-# In[72]:
-
-
-output_dir = 'output/{}/greedy'.format(graph_name)
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-pkl.dump(greedy_edges, open(os.path.join(output_dir, 'B{}.pkl'.format(budget)), 'wb'))
-
-
-# In[63]:
-
-
-core_before = sum(kcore.a)
-
-
-# In[65]:
-
-
-g_gt.add_edge_list(greedy_edges)
-
-
-# In[66]:
-
-
-core_after = sum(kcore_decomposition(g_gt).a)
-
-
-# In[69]:
-
-
-print('core before/after', core_before, core_after)
+    print('core before/after', core_before, core_after)
 
