@@ -1,34 +1,41 @@
 # core_maximization
 
+# software dependency
+
+- [graph_tool](https://graph-tool.skewed.de/)
+  - takes a lot of time to compile, be patient!
+- [networkit (modified by Han)](https://github.com/xiaohan2012/networkit/)
+  - the main modification by Han is the addition of dynamic core maintenance using method by [this paper](https://arxiv.org/abs/1606.00200)
+- pandas, numpy, implicit
+
+## other version info
+
+- Python 3.5
+
+# important files
+
+## preparing for data
+
+note that for `grqc` and `condmat`, candidate edges are already prepared in `data/{dataset}/recommended_edges_N{num_edges_per_node}.pkl``
+
+in case you need to generate it by yourself, use
+
+- `get_candidate_edges_by_MF.py`: this recommend candidate edges by MF techniques
+
+## algorithms
+
+- `greedy_noninc.py`: greedy (non-incremental)
+- `baselines.py`: random and MF
+- `edge_dag_algorithm.ipynb`: the edge DAG algorithm (**inmature for now**)
+
+## run experiments
+
+- `experiment_greedy.py`: experiment using greedy
+- `experiment_mf.py`: experiment using matrix factorization
+- `experiment_random.py`: experiment using random edge selection
+
+# evaluation
+
+- `evaluation_plot.ipynb`: open it as Jupyter notebook!
 
 # todo
-
-- [X] implement `PROMOTE-SUBCORE` (Algorithm 6)
-- [X] get the subcore list
-- [X] how to re-build networkit: https://networkit.iti.kit.edu/api/DevGuide.html#unit-tests-and-testing
-- [ ] implement `SUBCORE-GREEDY` (Algorithm 7)
-  - need to specifiy the  cache update mechanism (where "details omitted")
-- [ ] cache usage and update for `GREEDY`
-- experiment
-
-# motivation of subcore algorithm
-
-refer to the notebook, `subcore-saturation-ratio.ipynb`
-
-it's cheaper to promote a whole subcore for the following reason:
-
-given a subcore, some of its nodes (call `V_1`) might already have enough edges, all they need to be promoted is that the other nodes (call `V_2`) in the subcore are promoted .
-
-note that `V_1 | V_2 = V(subcore)` and `V_1 & V_2 = \emptyset`
-
-
-1. `\sum |V_1| / \sum (|V_1| + |V_2|)`: saturation ratio overall
-2. `\mean (|V_1| / (|V_1| + |V_2|))`: average saturation rate
-   - the higher the above ratios are, the fewer edges we need to promote subcores
-   - for grqc: mean 28%, median 33%
-
-# idea
-
-- for unpromoted nodes, subcore can use `greedy` as a subroutine to maximize gain
-  - currently, random is used
-- evaluating the gain of each subcore can be done in parallel
