@@ -16,7 +16,7 @@
 
 ## preparing for data
 
-note that for `grqc` and `condmat`, candidate edges are already prepared in `data/{dataset}/recommended_edges_N{num_edges_per_node}.pkl``
+note that for `grqc` and `condmat`, candidate edges are already prepared in `data/{dataset}/recommended_edges_N{num_edges_per_node}.pkl`
 
 in case you need to generate it by yourself, use
 
