@@ -66,7 +66,7 @@ def house_pos(g):
     meta_node_pos_dict = {
             'a': (0, 0),
             'b': (1, 0),
-            'c,d,e': (0, 1),
+            'c,d,e': (0.5, 0.5),
     }
     
     return pos, meta_node_pos_dict
@@ -88,7 +88,7 @@ def example1_pos(g):
             'c': (2, 0),
             'd': (1, 1),
             'e,f': (1, 2),
-            'g': (3, 2)
+            'g': (2, 2)
     }
     return pos, meta_node_pos_dict
 
