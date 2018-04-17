@@ -15,9 +15,12 @@ for dataset in tqdm(('condmat', 'enron')):
             u, v = map(int, l.split())
             g.add_edge(u, v)
 
-        ccs = nx.connected_components(g)
-        lcc = max(ccs, key=len)
-        lcc_g = g.subgraph(lcc)
-        lcc_g = nx.convert_node_labels_to_integers(lcc_g)
-        # nx.write_gpickle(lcc_g, 'data/{}/graph.gpkl'.format(dataset))
-        nx.write_graphml(lcc_g, output_path)
+        if False:
+            ccs = nx.connected_components(g)
+            lcc = max(ccs, key=len)
+            lcc_g = g.subgraph(lcc)
+            lcc_g = nx.convert_node_labels_to_integers(lcc_g)
+            nx.write_graphml(lcc_g, output_path)
+        else:
+            g = nx.convert_node_labels_to_integers(g)
+            nx.write_graphml(g, output_path)
