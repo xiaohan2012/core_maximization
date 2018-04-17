@@ -184,3 +184,8 @@ def get_degree_ge(g, kcore):
                 degge[u] += 1
     return degge
     
+
+def get_kcore(g):
+    return kcore_decomposition(g).a
+
+    
