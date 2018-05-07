@@ -12,6 +12,8 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--budget',
                         type=int,
                         help='number of edges to recommend')
+    parser.add_argument('-m', '--input_method', default='random',
+                        help='the candidate edge generation method')
     parser.add_argument('-n', '--n_cand_edges_per_node',
                         type=int,
                         help='number of candidate edges per node')
@@ -28,7 +30,10 @@ if __name__ == '__main__':
     G = nx.read_edgelist('data/{}/graph.edgelist'.format(graph_name))
     G = nx.convert_node_labels_to_integers(G)
 
-    cand_edges_path = 'data/{}/recommended_edges_N{}.pkl'.format(graph_name, args.n_cand_edges_per_node)
+    cand_edges_path = 'data/{}/recommended_edges_N{}_{}.pkl'.format(
+        graph_name,
+        args.n_cand_edges_per_node,
+        args.input_method)
     print('reading cand edges from {}'.format(cand_edges_path))
     cand_edges = pkl.load(open(
         cand_edges_path, 'rb'))

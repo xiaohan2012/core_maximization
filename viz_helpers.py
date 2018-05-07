@@ -8,6 +8,11 @@ COLOR_RED = normalize([178, 34, 34])
 COLOR_BLUE = normalize([31, 120, 180])
 COLOR_GREY = normalize([220, 220, 220])
 COLOR_BLACK = normalize([37, 37, 37])
+COLOR_YELLOW = normalize([255, 217, 47])
+COLOR_WHITE = normalize([255, 255, 255])
+COLOR_ORANGE = normalize([252, 120, 88])
+COLOR_PINK = normalize([255, 20, 147])
+COLOR_GREEN = normalize([50, 205, 50])
 
 
 def default_setting(g):
@@ -93,4 +98,12 @@ def example1_pos(g):
     return pos, meta_node_pos_dict
 
 
-
+def get_method_styles():
+    return [
+        (COLOR_GREY, 'p', '-'),
+        (COLOR_YELLOW, 's', '-'),
+        (COLOR_PINK, '*', ':'),
+        (COLOR_BLUE, '^', '--'),
+        (COLOR_GREEN, 'v', '-.'),
+        (COLOR_ORANGE, 'o', '-')
+    ]

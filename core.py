@@ -1,6 +1,5 @@
 from util import edge_set
 
-
 def best_edge(g, glist, cand_edges, debug=False):
     """without pruning
     """

@@ -16,6 +16,8 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--budget',
                         type=int,
                         help='number of edges to recommend')
+    parser.add_argument('-m', '--input_method', default='random',
+                        help='the candidate edge generation method')
     parser.add_argument('-n', '--n_cand_edges_per_node',
                         type=int,
                         help='number of candidate edges per node')
@@ -36,8 +38,12 @@ if __name__ == '__main__':
     prev_score = sum(glist.core)
     print('prev_score={}'.format(sum(glist.core)))
 
-    cand_edges = pkl.load(open(
-        'data/{}/recommended_edges_N{}.pkl'.format(graph_name, args.n_cand_edges_per_node), 'rb'))
+    cand_edges_path = 'data/{}/recommended_edges_N{}_{}.pkl'.format(
+        graph_name,
+        args.n_cand_edges_per_node,
+        args.input_method)
+    
+    cand_edges = pkl.load(open(cand_edges_path, 'rb'))
 
     greedy_edges = do_greedy(g, budget, cand_edges, debug=False, log=False, show_progress=True)
 

@@ -41,7 +41,7 @@ class CommonNeighbors():
         cand_edges = list(cand_edges)
         preds = nx.resource_allocation_index(self.g, cand_edges)
         # preds.sort(key=itemgetter(3), reverse=True)
-        top = sorted(preds, key=itemgetter(2), reverse=True)
+        top = sorted(preds, key=itemgetter(2), reverse=True)  # reverse=False
         return [(u, v) for u, v, p in top[:k]]
 
     

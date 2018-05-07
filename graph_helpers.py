@@ -1,4 +1,4 @@
-import itertools
+import numpy as np
 from graph_tool import Graph, GraphView
 from networkit import Graph as NGraph
 from graph_tool.topology import kcore_decomposition
@@ -8,6 +8,10 @@ from itertools import combinations
 
 def sort_pair(e):
     return tuple(sorted(e))
+
+
+def rand_edge(n):
+    return sort_pair([np.random.randint(n) for i in range(2)])
 
 
 def normalize_edges(es):
